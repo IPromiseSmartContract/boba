@@ -88,10 +88,10 @@ describe("BobaFactory", function () {
     // console.log("Owner address", await owner.getAddress());
     // [TokenImplementation, Bond] = await loadFixture(deployFixtures);
 
-    const cmBond = await ethers.getContractAt(
+    const cmBond = (await ethers.getContractAt(
       "MCV2_Bond",
       "0x8dce343a86aa950d539eee0e166affd0ef515c0c"
-    );
+    )) as MCV2_Bond;
 
     const BobaFactoryFactory = (await ethers.getContractFactory(
       "BobaFactory",

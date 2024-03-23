@@ -174,4 +174,8 @@ contract NFTMarketplace is ReentrancyGuard {
         }
         return items;
     }
+
+    function getOwner() public view returns (address) {
+        return owner;
+    }
 }
