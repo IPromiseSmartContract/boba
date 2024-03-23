@@ -8,6 +8,8 @@ import {MCV2_Token} from "./MCV2_Token.sol";
 import {MCV2_Bond} from "./MCV2_Bond.sol";
 import "./Boba.sol";
 
+import "hardhat/console.sol";
+
 contract BobaFactory is Ownable {
     BobaToken public boba;
     MCV2_Bond public mcBond;
@@ -32,20 +34,21 @@ contract BobaFactory is Ownable {
     mapping(uint256 => address) public expCruve;
 
     constructor(address initialOwner) Ownable(initialOwner) {
-        boba = new BobaToken(initialOwner);
+        boba = new BobaToken(address(this));
         mcBond = MCV2_Bond(0x8dce343A86Aa950d539eeE0e166AFfd0Ef515C0c);
-        // mcToken = new MCV2_Token(0x749bA94344521727f55a3007c777FbeB5F52C2Eb);
         mcZap = MCV2_ZapV1(payable(0x1Bf3183acc57571BecAea0E238d6C3A4d00633da));
         count = 0;
     }
 
-    function addPair(uint256 tokenId, address tokenAddress) public onlyOwner {
-        expCruve[tokenId] = tokenAddress;
-    }
+    receive() external payable {}
+
+    // function addPair(uint256 tokenId, address tokenAddress) public onlyOwner {
+    //     expCruve[tokenId] = tokenAddress;
+    // }
 
     function createNewToken(
-        TokenParams calldata tp,
-        BondParams calldata bp
+        TokenParams memory tp,
+        BondParams memory bp
     ) public returns (address expToken) {
         expToken = mcBond.createToken(
             MCV2_Bond.TokenParams(tp.name, tp.symbol),
@@ -62,39 +65,42 @@ contract BobaFactory is Ownable {
         return expToken;
     }
 
-    function createBoba(
-        address recipient,
-        uint256 tokenId,
-        string memory uri
-    ) public onlyOwner {
-        boba.safeMint(recipient, tokenId, uri);
+    function createBoba(address recipient, string memory uri) public onlyOwner {
+        boba.safeMint(recipient, count, uri);
     }
 
     function createNewPair(
-        TokenParams calldata tp,
-        BondParams calldata bp,
+        TokenParams memory tp,
+        BondParams memory bp,
         string calldata uri,
         address recipient
     ) public onlyOwner {
+        createBoba(recipient, uri);
         address expToken = createNewToken(tp, bp);
-        // require(expToken != address(0), "Token creation failed");
-        createBoba(recipient, count, uri);
-        require(expToken != address(0), "Boba creation failed");
-        addPair(count, expToken);
+        expCruve[count] = expToken;
         count++;
     }
 
-    function mint(uint256 tokenId, uint256 amount) public {
+    function mint(uint256 tokenId, uint amount, uint ethAmount) public payable {
         address tokenAddress = expCruve[tokenId];
-        mcZap.mintWithEth(tokenAddress, amount, msg.sender);
+        // console.log(address(this).balance);
+        // console.log(ethAmount);
+        mcZap.mintWithEth{value: ethAmount}(tokenAddress, amount, msg.sender);
     }
 
     function burn(
         uint256 tokenId,
         uint256 amount,
         uint256 refoundAmount
-    ) public {
+    ) public payable {
         address tokenAddress = expCruve[tokenId];
+        // console.log(address(this).balance);
+        MCV2_Token(tokenAddress).transferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
+        MCV2_Token(tokenAddress).approve(address(mcZap), amount);
         mcZap.burnToEth(tokenAddress, amount, refoundAmount, msg.sender);
     }
 
@@ -107,5 +113,17 @@ contract BobaFactory is Ownable {
 
     function getTokenAddress(uint256 tokenId) public view returns (address) {
         return expCruve[tokenId];
+    }
+
+    function getBobaOwner(uint256 tokenId) public view returns (address) {
+        return boba.ownerOf(tokenId);
+    }
+
+    function getBobaAddress() public view returns (address) {
+        return address(boba);
+    }
+
+    function getCount() public view returns (uint256) {
+        return count;
     }
 }
