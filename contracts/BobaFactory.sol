@@ -58,6 +58,7 @@ contract BobaFactory is Ownable {
                 bp.stepPrices
             )
         );
+        require(expToken != address(0), "Token creation failed");
         return expToken;
     }
 
@@ -72,11 +73,13 @@ contract BobaFactory is Ownable {
     function createNewPair(
         TokenParams calldata tp,
         BondParams calldata bp,
-        string memory uri,
+        string calldata uri,
         address recipient
     ) public onlyOwner {
         address expToken = createNewToken(tp, bp);
+        // require(expToken != address(0), "Token creation failed");
         createBoba(recipient, count, uri);
+        require(expToken != address(0), "Boba creation failed");
         addPair(count, expToken);
         count++;
     }
