@@ -74,62 +74,10 @@ let BABY_TOKEN = {
   },
 };
 
-// const tokenParams: BobaFactory.TokenParamsStruct = {
-//   name: "Baby Token",
-//   symbol: "BABY",
-// };
-
-// const bondParams: BobaFactory.BondParamsStruct = {
-//   mintRoyalty: 30n, // 1%
-//   burnRoyalty: 30n, // 1.5%
-//   reserveToken: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
-//   maxSupply: wei(100000n),
-//   stepRanges: [
-//     wei(100n),
-//     wei(1000n),
-//     wei(2000n),
-//     wei(5000n),
-//     wei(10000n),
-//     wei(20000n),
-//     wei(50000n),
-//     wei(100000n),
-//   ],
-//   stepPrices: [
-//     wei(0n, 9),
-//     wei(2n, 9),
-//     wei(3n, 9),
-//     wei(4n, 9),
-//     wei(5n, 9),
-//     wei(7n, 9),
-//     wei(10n, 9),
-//     wei(15n, 9),
-//   ],
-// };
-
 const MAX_STEPS = getMaxSteps("sepolia");
 
 describe("BobaFactory", function () {
-  // async function deployFixtures() {
-  //   const TokenImplementation = await ethers.deployContract("MCV2_Token");
-  //   await TokenImplementation.waitForDeployment();
-
-  //   const NFTImplementation = await ethers.deployContract("MCV2_MultiToken");
-  //   await NFTImplementation.waitForDeployment();
-
-  //   const Bond = await ethers.deployContract("MCV2_Bond", [
-  //     TokenImplementation.target,
-  //     NFTImplementation.target,
-  //     PROTOCOL_BENEFICIARY,
-  //     0n,
-  //     MAX_STEPS,
-  //   ]);
-  //   await Bond.waitForDeployment();
-
-  //   return [TokenImplementation, Bond];
-  // }
-
   let bobaFactory: BobaFactory;
-  let TokenImplementation, Bond;
 
   let owner: Signer;
   let user: Signer;
